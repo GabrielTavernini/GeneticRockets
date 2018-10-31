@@ -1,5 +1,5 @@
 var population;
-var lifespan = 200;
+var lifespan = 250;
 var lifeP;
 var count = 0;
 var target;
@@ -218,7 +218,7 @@ function Rocket(dna) {
 
 	this.calcFitness = function(){
 		var d = dist(this.pos.x, this.pos.y, target.x, target.y);
-		this.fitness = map(d, 0, width, width, 0);
+		this.fitness = Math.pow(map(d, 0, width, 100, 0),2);
 
 		if(this.completed){
 			if(this.time < bestTime){
