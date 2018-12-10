@@ -1,22 +1,30 @@
 var population;
-var lifespan = 250;
+var lifespan = 150;
 var lifeP;
+var fitnessP;
+var bestFitness = 0;
 var count = 0;
 var target;
-var maxForce = 0.2;
+var maxForce = 0.7;
 var bestDNA;
 var bestRocket;
 var bestTime = Infinity;
 
-var rx = 150;
-var ry = 200;
-var rw = 200;
-var rh = 10;
+var rx = 25;
+var ry = 280;
+var rw = 245;
+var rh = 15;
+
+var rx1 = 230;
+var ry1 = 150;
+var rw1 = 245;
+var rh1 = 15;
 
 function setup() {
-	createCanvas(500, 400);
+	createCanvas(500, 500);
 	population = new Population();
 	lifeP = createP();
+	fitnessP = createP();
 	target  = createVector(width/2, 50);
 	bestDNA = new DNA();
 	bestRocket = new Rocket(bestDNA);
@@ -30,6 +38,7 @@ function draw() {
 	bestRocket.showHighlighted();
 
 	lifeP.html("Best Time: " + bestTime);
+	fitnessP.html("Best Fitness: " + bestFitness);
 	count++;
 
 	if(count == lifespan){
@@ -42,6 +51,7 @@ function draw() {
 
 	fill(255);
 	rect(rx,ry,rw,rh);
+	rect(rx1,ry1,rw1,rh1);
 
 	ellipse(target.x, target.y, 16)
 }
@@ -49,7 +59,7 @@ function draw() {
 
 function Population(){
 	this.rockets = [];
-	this.popsize = 200;
+	this.popsize = 1000;
 	this.matingpool = [];
 
 	for(var i = 0; i < this.popsize; i++){
@@ -72,7 +82,9 @@ function Population(){
 				bestDNA = this.rockets[i].dna;
 			}
 		}
-		createP(maxfit);
+		
+		if(maxfit > bestFitness)
+            bestFitness = maxfit;
 
 		for(var i = 0; i < this.popsize; i++){
 			this.rockets[i].fitness /= maxfit;
@@ -97,6 +109,7 @@ function Population(){
 			child.mutation();
 			newRockets[i] = new Rocket(child)
 		}
+
 		this.rockets = newRockets;
 	}
 }
@@ -158,6 +171,16 @@ function Rocket(dna) {
 		this.acc.add(force);
 	}
 
+	this.reset = function(){
+		this.pos = createVector(width/2, height);
+		this.vel = createVector();
+		this.acc = createVector();
+		this.fitness = 0;
+		this.completed = false;
+		this.crashed = false;
+		this.time = 0;
+	}
+
 	this.update = function(){
 		var d = dist(this.pos.x, this.pos.y, target.x, target.y)
 		if(d < 10){
@@ -168,6 +191,12 @@ function Rocket(dna) {
 		}
 
 		if(this.pos.x > rx && this.pos.x < rx + rw && this.pos.y > ry && this.pos.y < ry + rh){
+			this.crashed = true;
+			if(this.time == 0)
+				this.time = count;
+		}
+
+		if(this.pos.x > rx1 && this.pos.x < rx1 + rw1 && this.pos.y > ry1 && this.pos.y < ry1 + rh1){
 			this.crashed = true;
 			if(this.time == 0)
 				this.time = count;
@@ -218,15 +247,16 @@ function Rocket(dna) {
 
 	this.calcFitness = function(){
 		var d = dist(this.pos.x, this.pos.y, target.x, target.y);
-		this.fitness = Math.pow(map(d, 0, width, 100, 0),2);
+		this.fitness = Math.pow(map(d, 0, height, height, 0),2);
 
 		if(this.completed){
 			if(this.time < bestTime){
 				bestTime = this.time;
+				lifespan = bestTime + 10;
 			}
 
 			var multiplier = map(this.time, 0, lifespan, 25, 10);
-			console.log(multiplier);
+			//console.log(multiplier);
 			this.fitness *= multiplier;
 		}
 			
