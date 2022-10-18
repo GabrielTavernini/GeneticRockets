@@ -1,3 +1,3 @@
 # Genetic Rockets
 
-Great stuff
+Powerful AI applicazzione. Retweeted twice by EMusk.
